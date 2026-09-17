@@ -34,3 +34,4 @@ public class PlayerMovementScript : MonoBehaviour
         //moves in velocity so you stop when hitting an object
         rb.linearVelocity = movementInput * speed;
     }
+}
