@@ -1,37 +1,35 @@
- using UnityEngine;
+using UnityEngine;
 
 public class PlayerMovementScript : MonoBehaviour
 {
-    //sets the speed and makes it a variable within the unity editor
-    public float speed = 5f; 
+    public float speed = 120f;
+    public float acceleration = 120f;   // how fast you reach top speed
+    public float deceleration = 20f;   // how fast you slow down after releasing input
 
     private Rigidbody2D rb;
     private Vector2 movementInput;
 
     void Start()
     {
-        //finds the rigidbody within the player
         rb = GetComponent<Rigidbody2D>();
-
-        //stops the player from spinning
         rb.freezeRotation = true;
-
-
     }
 
     void Update()
     {
-        //gets userinput and converts it to a float
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
 
-        //stores movement direction and normalises to make sure diagonal movement isn't faster
         movementInput = new Vector2(moveX, moveY).normalized;
     }
 
     void FixedUpdate()
     {
-        //moves in velocity so you stop when hitting an object
-        rb.linearVelocity = movementInput * speed;
+        Vector2 targetVelocity = movementInput * speed;
+
+        // pick accel or decel rate depending on whether there's input
+        float rate = movementInput.sqrMagnitude > 0.01f ? acceleration : deceleration;
+
+        rb.linearVelocity = Vector2.MoveTowards(rb.linearVelocity, targetVelocity, rate * Time.fixedDeltaTime);
     }
 }
