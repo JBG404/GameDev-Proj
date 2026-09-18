@@ -88,6 +88,8 @@ public class FloorGenerator : MonoBehaviour {
 
     void Start() {
         debugMap = Generate();
+        Debug.Log($"Generated {debugMap.Count} rooms");
+        Debug.Log($"Used seed: {seed}");
     }
 
     void OnDrawGizmos() {
