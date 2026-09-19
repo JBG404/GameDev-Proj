@@ -5,6 +5,9 @@ public class FloorGenerator : MonoBehaviour {
     public int targetRoomCount = 12;
     public int seed = 0;
 
+    public RoomDatabase database;
+    public float roomSize = 10f;
+
     public Dictionary<Vector2Int, RoomNode> Generate() {
         var rng = seed == 0 ? new System.Random() : new System.Random(seed);
         var map = new Dictionary<Vector2Int, RoomNode>();
@@ -90,20 +93,37 @@ public class FloorGenerator : MonoBehaviour {
         debugMap = Generate();
         Debug.Log($"Generated {debugMap.Count} rooms");
         Debug.Log($"Used seed: {seed}");
+        SpawnRooms(debugMap, new System.Random());
     }
 
-    void OnDrawGizmos() {
+    void OnDrawGizmos()
+    {
         if (debugMap == null) return;
-        float roomSize = 2f;
-        foreach (var kv in debugMap) {
+        foreach (var kv in debugMap)
+        {
             var pos = new Vector3(kv.Key.x, kv.Key.y) * roomSize;
-            Gizmos.color = kv.Value.Type switch {
+            Gizmos.color = kv.Value.Type switch
+            {
                 RoomType.Start => Color.green,
                 RoomType.Boss => Color.red,
                 RoomType.Treasure => Color.yellow,
                 _ => Color.white
             };
             Gizmos.DrawWireCube(pos, Vector3.one * roomSize * 0.9f);
+        }
+    }
+
+    void SpawnRooms(Dictionary<Vector2Int, RoomNode> map, System.Random rng)
+    {
+        foreach (var kv in map)
+        {
+            var node = kv.Value;
+            var prefab = database.GetRandomPrefab(node.Type, rng);
+            if (prefab == null) continue;
+
+            var worldPos = new Vector3(node.GridPos.x, node.GridPos.y) * roomSize;
+            var instance = Instantiate(prefab, worldPos, Quaternion.identity, transform);
+            instance.GetComponent<RoomController>().SetDoors(node.Doors);
         }
     }
 }
